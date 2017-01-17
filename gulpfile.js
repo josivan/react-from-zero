@@ -1,17 +1,10 @@
-const gulp    = require('gulp'),
-      rollup  = require('gulp-rollup');
+const gulp      = require('gulp'),
+      babel     = require('gulp-babel'),
+      polyfill  = require('babel-polyfill');
 
 
 gulp.task('bundle', () => {
   gulp.src('./src/**/*.js')
-    .pipe(rollup({
-      entry: './src/index3.js',
-      format: "iife",
-      plugins: [
-        require("rollup-plugin-babel")({
-          "plugins": ["external-helpers"]
-        })
-      ]
-    }))
+    .pipe(babel())
     .pipe(gulp.dest('./dest'));
 });
