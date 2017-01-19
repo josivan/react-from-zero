@@ -1,47 +1,51 @@
 'use strict';
 
-const babelify    = require('babelify'),
-      browserify  = require('browserify'),
-      clean       = require('gulp-clean'),
-      gulp        = require('gulp'),
-      reactify    = require('reactify'),
-      source      = require('vinyl-source-stream'),
-      babel       = require('gulp-babel');
+const 
+  gulp        = require('gulp'),
+  browserify  = require('browserify'),
+  source      = require('vinyl-source-stream'),
+  gutil       = require('gulp-util'),
+  babelify    = require('babelify'),
+  clean       = require('gulp-clean');
+
+const dependencies = [
+  'react',
+  'react-dom'
+];
 
 gulp.task('clean', () => {
-  gulp.src(['bundle', 'dest'])
+  gulp.src(['bundle', 'dest', 'web'])
     .pipe(clean());
 });
 
-gulp.task('babel', () => {
-  gulp.src('./src/**/*.js*')
-    .pipe(babel())
-    .pipe(gulp.dest('./dest'));
-});
-
-gulp.task('_jsx', () => {
-  var b = browserify({
-    entries: 'src/index3.jsx',
-    extensions: ['.jsx'],
-    debug: true,
-    transform: [reactify]
+// should be run to tranform jsx files
+gulp.task('bundle', () => {
+  let appBundler = browserify({
+    entries: ['src/index3.jsx'],
+    debug: true
   });
 
-  return b.bundle()
-    .pipe(source('./src'))
-    .pipe(bundle())
-    .pipe(gulp.dest('./dest'));
-});
-
-gulp.task('jsx', () => {
-  var b = browserify({
-    entries: 'dest/index3.js',
-    extensions: ['.js'],
-    debug: true,
-    transform: [reactify]
+  dependencies.forEach((dep) => {
+    appBundler.external(dep);
   });
 
-  return b.bundle()
-    .pipe(source('./dest/index3.js'))
-    .pipe(gulp.dest('./bundle'));
+  appBundler
+    .transform(babelify)
+    .bundle()
+    .on('error', gutil.log)
+    .pipe(source('bundle.js'))
+    .pipe(gulp.dest('./web/js/'));
+});
+
+// based on http://jpsierens.com/tutorial-gulp-javascript-2015-react/
+// run at least once to bundle vendors content
+gulp.task('vendors', () => {
+ 		browserify({
+			require: dependencies,
+			debug: true
+		})
+			.bundle()
+			.on('error', gutil.log)
+			.pipe(source('vendors.js'))
+			.pipe(gulp.dest('./web/js/'));
 });
