@@ -2,13 +2,18 @@
 
 const babelify    = require('babelify'),
       browserify  = require('browserify'),
+      clean       = require('gulp-clean'),
       gulp        = require('gulp'),
       reactify    = require('reactify'),
       source      = require('vinyl-source-stream'),
       babel       = require('gulp-babel');
 
+gulp.task('clean', () => {
+  gulp.src(['bundle', 'dest'])
+    .pipe(clean());
+});
 
-gulp.task('bundle', () => {
+gulp.task('babel', () => {
   gulp.src('./src/**/*.js*')
     .pipe(babel())
     .pipe(gulp.dest('./dest'));
